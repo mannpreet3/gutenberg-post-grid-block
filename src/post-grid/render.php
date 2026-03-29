@@ -16,8 +16,10 @@ $orderby       = isset( $attributes['orderBy'] ) ? sanitize_key( $attributes['or
 $categories    = ! empty( $attributes['categories'] ) && is_array( $attributes['categories'] ) ? array_map( 'intval', $attributes['categories'] ) : array();
 $columns       = isset( $attributes['columns'] ) ? max( 1, (int) $attributes['columns'] ) : 3;
 $show_author   = ! empty( $attributes['displayAuthor'] );
-$show_date     = ! empty( $attributes['displayDate'] );
+$show_date     = ! empty($attributes['displayDate' ] );
+$button_text     = $attributes['buttonText'];
 $img_size      = ! empty( $attributes['featuredImageSizeSlug'] ) ? sanitize_key( $attributes['featuredImageSizeSlug'] ) : 'medium';
+
 
 // Debug: Log the selected post type
 error_log( 'Post Grid Block - Selected post type: ' . $post_type );
@@ -52,7 +54,7 @@ error_log( 'Post Grid Block - Found posts: ' . $q->found_posts );
 
 $wrapper_attributes = get_block_wrapper_attributes(
 	array(
-		'style' => sprintf( '--grid-columns:%d;', $columns ),
+		'style' => sprintf( 'grid-template-columns: repeat(%d, minmax(0, 1fr));', $columns ),
 		'data-post-type' => $post_type,
 	)
 );
@@ -71,40 +73,35 @@ $wrapper_attributes = get_block_wrapper_attributes(
 		while ( $q->have_posts() ) :
 			$q->the_post();
 			?>
-			<article class="pg__post" data-post-id="<?php echo get_the_ID(); ?>" data-post-type="<?php echo get_post_type(); ?>">
+			<div class="pg__post" data-post-id="<?php echo get_the_ID(); ?>" data-post-type="<?php echo get_post_type(); ?>">
 				<?php if ( has_post_thumbnail() ) : ?>
 					<a class="pg__post__thumb" href="<?php the_permalink(); ?>">
 						<?php the_post_thumbnail( $img_size ); ?>
 					</a>
 				<?php endif; ?>
+				<div class="pg__post-content">
+					<h3 class="pg__post__title">
+						<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+					</h3>
 
-				<h3 class="pg__post__title">
-					<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-				</h3>
-
-				<!-- Debug info for each post -->
-				<?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : ?>
-					<p style="font-size: 11px; color: #666;">
-						ID: <?php echo get_the_ID(); ?> | Type: <?php echo get_post_type(); ?>
-					</p>
-				<?php endif; ?>
-
-				<?php if ( $show_author || $show_date ) : ?>
-					<div class="pg__post__meta">
-						<?php if ( $show_date ) : ?>
-							<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>">
-								<?php echo esc_html( get_the_date() ); ?>
-							</time>
-						<?php endif; ?>
-						<?php if ( $show_author ) : ?>
-							<span class="pg__post__byline">
-								<?php echo esc_html_x( 'by', 'byline', 'post-grid' ); ?>
-								<?php the_author(); ?>
-							</span>
-						<?php endif; ?>
-					</div>
-				<?php endif; ?>
-			</article>
+					<?php if ( $show_author || $show_date ) : ?>
+						<div class="pg__post__meta">
+							<?php if ( $show_date ) : ?>
+								<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>">
+									<?php echo esc_html( get_the_date() ); ?>
+								</time>
+							<?php endif; ?>
+							<?php if ( $show_author ) : ?>
+								<span class="pg__post__byline">
+									<?php echo esc_html_x( 'by', 'byline', 'post-grid' ); ?>
+									<?php the_author(); ?>
+								</span>
+							<?php endif; ?>
+						</div>
+					<?php endif; ?>
+					<a href="<?php the_permalink(); ?>"><?php echo $button_text; ?></a>
+				</div>
+			</div>
 		<?php endwhile; wp_reset_postdata(); ?>
 	<?php else : ?>
 		<p><?php esc_html_e( 'No', 'post-grid' ); ?> <?php echo esc_html( $post_type ); ?> <?php esc_html_e( 'found.', 'post-grid' ); ?></p>

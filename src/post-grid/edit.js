@@ -56,6 +56,7 @@ export default function Edit({ attributes, setAttributes }) {
 	  displayAuthor = true,
 	  displayDate = true,
 	  featuredImageSizeSlug = 'medium',
+	  buttonText = 'View Post'
 	} = attributes;
   
 	// Get all public post types
@@ -112,10 +113,6 @@ export default function Edit({ attributes, setAttributes }) {
 	  }
 	}, [postType]);
   
-	const blockProps = useBlockProps({
-	  className: 'pg__post-grid',
-	  style: { ['--grid-columns']: columns },
-	});
   
 	// Category input only for 'post' post type
 	const categoryIdsText = categories?.length ? categories.join(',') : '';
@@ -160,12 +157,11 @@ export default function Edit({ attributes, setAttributes }) {
 			});
 		}, 100);
 	};
-  
-	// Debug info (remove in production)
-	console.log('Current postType:', postType);
-	console.log('Fetched posts:', posts);
-	console.log('Posts length:', posts?.length || 0);
-  
+	
+	const blockProps = useBlockProps({
+	  className: 'pg__post-grid',
+	  style: { ['grid-template-columns']: `repeat(${columns}, minmax(0, 1fr))` },
+	});
 	return (
 	  <>
 		<InspectorControls>
@@ -252,6 +248,15 @@ export default function Edit({ attributes, setAttributes }) {
 			  onChange={(val) => setAttributes({ featuredImageSizeSlug: val })}
 			/>
 		  </PanelBody>
+
+		  <PanelBody>
+		  	<TextControl
+                        label="Button Text"
+                        value={buttonText}
+                        onChange={(value) => setAttributes({ buttonText: value })}
+                        help="This is a text field inside the PanelBody"
+                    />
+		  </PanelBody>
 		</InspectorControls>
   
 		<div {...blockProps}>
@@ -300,21 +305,23 @@ export default function Edit({ attributes, setAttributes }) {
 					<img src={imgUrl} alt="" />
 				  </a>
 				)}
-				<h3 className="pg__post__title">
-				  <a href={link} target="_blank" rel="noreferrer" dangerouslySetInnerHTML={{ __html: title }} />
-				</h3>
-				<p className="pg__post-type-debug">Type: {post.type}</p>
-				{(displayDate || displayAuthor) && (
-				  <div className="pg__post__meta">
-					{displayDate && dateStr && (
-					  <time>{new Date(dateStr).toLocaleDateString()}</time>
+				<div class="pg__post-content">
+					<h3 className="pg__post__title">
+					<a href={link} target="_blank" rel="noreferrer" dangerouslySetInnerHTML={{ __html: title }} />
+					</h3>
+					{(displayDate || displayAuthor) && (
+					<div className="pg__post__meta">
+						{displayDate && dateStr && (
+						<time>{new Date(dateStr).toLocaleDateString()}</time>
+						)}
+						{displayAuthor && post._embedded?.author?.[0]?.name && (
+						<span className="pg__post__byline"> {__('by', 'post-grid')} {post._embedded.author[0].name}</span>
+						)}
+					</div>
 					)}
-					{displayAuthor && post._embedded?.author?.[0]?.name && (
-					  <span className="pg__post__byline"> {__('by', 'post-grid')} {post._embedded.author[0].name}</span>
-					)}
-				  </div>
-				)}
-			  </div>
+					<a href="<?php the_permalink(); ?>">{buttonText}</a>
+				</div>
+				</div>
 			);
 		  })}
 		</div>

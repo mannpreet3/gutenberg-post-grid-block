@@ -25,7 +25,8 @@
 		},
 		"displayAuthor": { "type": "boolean", "default": true },
 		"displayDate": { "type": "boolean", "default": true },
-		"featuredImageSizeSlug": { "type": "string", "default": "medium" }
+		"featuredImageSizeSlug": { "type": "string", "default": "medium" },
+		"buttonText": { "type": "string", "default": "View Post" }
 	},
 	"textdomain": "post-grid",
 	"editorScript": "file:./index.js",
