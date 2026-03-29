@@ -1,0 +1,44 @@
+/**
+ * The following styles get applied both on the front of your site
+ * and in the editor.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+
+.wp-block-create-block-post-grid {
+	display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+	border: unset !important;
+    max-width: 80% !important;
+} 
+  .wp-block--post-grid .pg__post {
+	border: 1px solid #e5e5e5;
+	background: #fff;
+	border-radius: 6px;
+	padding: 12px;
+  }
+  .pg__post {
+    background-color: #ffffff; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    padding: 20px; 
+    border-radius: 8px; 
+}
+  .wp-block--post-grid .pg__post__thumb img {
+	width: 100%;
+	height: auto;
+	display: block;
+	border-radius: 4px;
+  }
+  
+  .wp-block--post-grid .pg__post__title {
+	margin: 0.6rem 0;
+	font-size: 1rem;
+	line-height: 1.3;
+  }
+  
+  .wp-block--post-grid .pg__post__meta {
+	color: #666;
+	font-size: 0.85rem;
+  }
+  

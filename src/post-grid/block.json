@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "create-block/post-grid",
+	"version": "0.1.0",
+	"title": "Post Grid",
+	"category": "widgets",
+	"icon": "smiley",
+	"description": "Example block scaffolded with Create Block tool.",
+	"example": {},
+	"supports": {
+		"html": false,
+		"align": ["wide", "full"]
+	},
+	"attributes": {
+		"postType": { "type": "string", "default": "post" },
+		"postsToShow": { "type": "number", "default": 6 },
+		"columns": { "type": "number", "default": 3 },
+		"order": { "type": "string", "default": "desc" },
+		"orderBy": { "type": "string", "default": "date" },
+		"categories": {
+		"type": "array",
+		"items": { "type": "number" },
+		"default": []
+		},
+		"displayAuthor": { "type": "boolean", "default": true },
+		"displayDate": { "type": "boolean", "default": true },
+		"featuredImageSizeSlug": { "type": "string", "default": "medium" }
+	},
+	"textdomain": "post-grid",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css",
+	"render": "file:./render.php",
+	"viewScript": "file:./view.js"
+}
