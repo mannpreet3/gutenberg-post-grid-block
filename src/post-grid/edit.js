@@ -26,25 +26,11 @@ import {
 	TextControl,
 	Spinner,
 	Placeholder,
+	ColorPalette
 } from '@wordpress/components';
 
-
-/**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * Those files can contain any CSS code that gets applied to the editor.
- *
- * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
- */
 import './editor.scss';
 
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @return {Element} Element to render.
- */
 export default function Edit({ attributes, setAttributes }) {
 	const {
 	  postType = 'post',
@@ -56,7 +42,11 @@ export default function Edit({ attributes, setAttributes }) {
 	  displayAuthor = true,
 	  displayDate = true,
 	  featuredImageSizeSlug = 'medium',
-	  buttonText = 'View Post'
+	  buttonText = 'View Post',
+	  buttonBgColor,
+	  buttonTextColor,
+	  displayExcerpt,
+	  postsPerPage
 	} = attributes;
   
 	// Get all public post types
@@ -66,8 +56,9 @@ export default function Edit({ attributes, setAttributes }) {
 	}, []);
   
 	// Build query with cache busting
+	const postsToFetch = postsToShow === -1 ? postsPerPage : postsToShow;
 	const query = {
-	  per_page: postsToShow,
+	  per_page: postsToFetch,
 	  order,
 	  orderby: orderBy,
 	  _embed: true,
@@ -99,7 +90,7 @@ export default function Edit({ attributes, setAttributes }) {
 		  isLoading: isResolving || fetchedPosts === undefined,
 		};
 	  },
-	  [postType, postsToShow, order, orderBy, JSON.stringify(categories)]
+	  [postType, postsToFetch, order, orderBy, JSON.stringify(categories)]
 	);
   
 	// Force cache invalidation when post type changes
@@ -178,12 +169,18 @@ export default function Edit({ attributes, setAttributes }) {
 			
 			<RangeControl
 			  label={__('Posts to show', 'post-grid')}
-			  min={1}
+			  min={-1}
 			  max={12}
 			  value={postsToShow}
-			  onChange={(val) => setAttributes({ postsToShow: val })}
+			  onChange={(val) => {if (val === 0) return; setAttributes({ postsToShow: val })}}
 			/>
-			
+			{postsToShow === -1 && (
+			<TextControl
+				label="Posts Per Page"
+				value={postsPerPage}
+				onChange={(value) => setAttributes({ postsPerPage: value })}
+			/>
+			)}
 			<SelectControl
 			  label={__('Order by', 'post-grid')}
 			  value={orderBy}
@@ -227,6 +224,11 @@ export default function Edit({ attributes, setAttributes }) {
 			  onChange={(val) => setAttributes({ columns: val })}
 			/>
 			<ToggleControl
+			  label={__('Show Excerpt', 'post-grid')}
+			  checked={displayExcerpt}
+			  onChange={(val) => setAttributes({ displayExcerpt: val })}
+			/>
+			<ToggleControl
 			  label={__('Show author', 'post-grid')}
 			  checked={displayAuthor}
 			  onChange={(val) => setAttributes({ displayAuthor: val })}
@@ -249,14 +251,22 @@ export default function Edit({ attributes, setAttributes }) {
 			/>
 		  </PanelBody>
 
-		  <PanelBody>
+		  <PanelBody  title={__('Button', 'post-grid')} initialOpen={false}>
 		  	<TextControl
-                        label="Button Text"
-                        value={buttonText}
-                        onChange={(value) => setAttributes({ buttonText: value })}
-                        help="This is a text field inside the PanelBody"
-                    />
-		  </PanelBody>
+				label="Button Text"
+				value={buttonText}
+				onChange={(value) => setAttributes({ buttonText: value })}
+			/>
+				<ColorPalette
+					value={buttonBgColor}
+					onChange={(color) => setAttributes({ buttonBgColor: color })}
+				/>
+				<ColorPalette
+				label="utton Text Color"
+					value={buttonTextColor}
+					onChange={(color) => setAttributes({ buttonTextColor: color })}
+				/>
+				</PanelBody>
 		</InspectorControls>
   
 		<div {...blockProps}>
@@ -278,15 +288,11 @@ export default function Edit({ attributes, setAttributes }) {
 			</Placeholder>
 		  )}
 		  
-		  {/* {postType && !isLoading && Array.isArray(posts) && (
-			<div className="pg__post-grid-debug">
-			  <p><small>Showing: {posts.length} {postType}(s)</small></p>
-			</div>
-		  )} */}
-		  
 		  {postType && !isLoading && Array.isArray(posts) && posts.map((post) => {
 			const title = post.title?.rendered || __('(No title)', 'post-grid');
 			const link = post.link;
+			const excerpt = post.excerpt?.rendered || '';
+			const plainExcerpt = excerpt.replace(/<[^>]+>/g, '');
 			
 			// Try to get featured image URL from _embed
 			let imgUrl;
@@ -319,7 +325,12 @@ export default function Edit({ attributes, setAttributes }) {
 						)}
 					</div>
 					)}
-					<a href="<?php the_permalink(); ?>">{buttonText}</a>
+					{(displayExcerpt) && (
+						<div className='pg__post_excerpt'>
+							{plainExcerpt}
+						</div>
+					)}
+					<a href={link} className='pg__button' style={{backgroundColor: attributes.buttonBgColor, color: attributes.buttonTextColor,}}>{buttonText}</a>
 				</div>
 				</div>
 			);

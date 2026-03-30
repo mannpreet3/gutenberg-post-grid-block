@@ -6,7 +6,7 @@
 	"title": "Post Grid",
 	"category": "widgets",
 	"icon": "smiley",
-	"description": "Example block scaffolded with Create Block tool.",
+	"description": "A flexible Gutenberg block that displays posts from any post type in a responsive grid.",
 	"example": {},
 	"supports": {
 		"html": false,
@@ -15,6 +15,7 @@
 	"attributes": {
 		"postType": { "type": "string", "default": "post" },
 		"postsToShow": { "type": "number", "default": 6 },
+		"postsPerPage": { "type": "string", "default": 10 },
 		"columns": { "type": "number", "default": 3 },
 		"order": { "type": "string", "default": "desc" },
 		"orderBy": { "type": "string", "default": "date" },
@@ -24,9 +25,12 @@
 		"default": []
 		},
 		"displayAuthor": { "type": "boolean", "default": true },
+		"displayExcerpt": { "type": "boolean", "default": true },
 		"displayDate": { "type": "boolean", "default": true },
 		"featuredImageSizeSlug": { "type": "string", "default": "medium" },
-		"buttonText": { "type": "string", "default": "View Post" }
+		"buttonText": { "type": "string", "default": "View Post" },
+		"buttonBgColor": { "type": "string", "default": "#000000" },
+    	"buttonTextColor": { "type": "string", "default": "#ffffff" }
 	},
 	"textdomain": "post-grid",
 	"editorScript": "file:./index.js",

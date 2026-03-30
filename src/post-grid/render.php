@@ -1,24 +1,22 @@
 <?php
-/**
- * PHP file to use when rendering the block type on the server to show on the front end.
- *
- * The following variables are exposed to the file:
- *     $attributes (array): The block attributes.
- *     $content (string): The block default content.
- *     $block (WP_Block): The block instance.
- *
- * @see https://github.com/WordPress/gutenberg/blob/trunk/docs/reference-guides/block-api/block-metadata.md#render
- */
 $post_type     = ! empty( $attributes['postType'] ) ? sanitize_key( $attributes['postType'] ) : 'post';
 $posts_to_show = isset( $attributes['postsToShow'] ) ? (int) $attributes['postsToShow'] : 6;
+$posts_per_page = isset( $attributes['postsPerPage'] ) ? (int) $attributes['postsPerPage'] : 10;
 $order         = isset( $attributes['order'] ) && in_array( strtolower( $attributes['order'] ), array( 'asc', 'desc' ), true ) ? $attributes['order'] : 'desc';
 $orderby       = isset( $attributes['orderBy'] ) ? sanitize_key( $attributes['orderBy'] ) : 'date';
 $categories    = ! empty( $attributes['categories'] ) && is_array( $attributes['categories'] ) ? array_map( 'intval', $attributes['categories'] ) : array();
 $columns       = isset( $attributes['columns'] ) ? max( 1, (int) $attributes['columns'] ) : 3;
 $show_author   = ! empty( $attributes['displayAuthor'] );
 $show_date     = ! empty($attributes['displayDate' ] );
+$display_excerpt     = ! empty($attributes['displayExcerpt' ] );
 $button_text     = $attributes['buttonText'];
+$button_bg_color   = $attributes['buttonBgColor'];
+$button_text_color     = $attributes['buttonTextColor' ];
 $img_size      = ! empty( $attributes['featuredImageSizeSlug'] ) ? sanitize_key( $attributes['featuredImageSizeSlug'] ) : 'medium';
+
+$paged = get_query_var('paged') ? get_query_var('paged') : 1;
+$offset = ( $paged - 1 ) * ( $posts_to_show === -1 ? $posts_per_page : $posts_to_show );
+$per_page = $posts_to_show === -1 ? $posts_per_page : $posts_to_show;
 
 
 // Debug: Log the selected post type
@@ -32,7 +30,7 @@ if ( ! post_type_exists( $post_type ) ) {
 
 $args = array(
 	'post_type'           => $post_type,
-	'posts_per_page'      => $posts_to_show,
+	'posts_per_page'      => $per_page,
 	'orderby'             => $orderby,
 	'order'               => $order,
 	'ignore_sticky_posts' => true,
@@ -59,7 +57,7 @@ $wrapper_attributes = get_block_wrapper_attributes(
 	)
 );
 ?>
-<div <?php echo $wrapper_attributes; ?>>
+<div class="pg__grid-main">
 	<!-- Debug info (remove in production) -->
 	<?php if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) : ?>
 		<!-- <p style="background: #f0f0f0; padding: 5px; font-size: 12px;">
@@ -67,8 +65,8 @@ $wrapper_attributes = get_block_wrapper_attributes(
 			Found: <?php //echo esc_html( $q->found_posts ); ?> posts
 		</p> -->
 	<?php endif; ?>
-
-	<?php if ( $q->have_posts() ) : ?>
+	<div <?php echo $wrapper_attributes; ?>>	
+		<?php if ( $q->have_posts() ) : ?>
 		<?php
 		while ( $q->have_posts() ) :
 			$q->the_post();
@@ -98,11 +96,27 @@ $wrapper_attributes = get_block_wrapper_attributes(
 								</span>
 							<?php endif; ?>
 						</div>
+					<?php endif; 
+					if($display_excerpt):
+					?>
+					<div class='pg__post_excerpt'><?php the_excerpt(); ?></div>
 					<?php endif; ?>
-					<a href="<?php the_permalink(); ?>"><?php echo $button_text; ?></a>
+					<a href="<?php the_permalink(); ?>" class="pg__button" style="background-color:<?php echo $button_bg_color; ?>; color:<?php echo $button_text_color ?>;"><?php echo $button_text; ?></a>
 				</div>
 			</div>
-		<?php endwhile; wp_reset_postdata(); ?>
+		<?php endwhile; wp_reset_postdata(); 
+		?>
+	</div>
+	<?php
+		if ( $posts_to_show === -1 && $q->max_num_pages > 1 ) {
+			$prev_link = get_previous_posts_link( __('Prev', 'post-grid') );
+			$next_link = get_next_posts_link( __('Next', 'post-grid'), $q->max_num_pages );
+	?>
+		<div class="pg__post-pagination">
+			<span class="prev"><?php echo $prev_link; ?></span>
+			<span class="next"><?php echo $next_link; ?></span>
+		</div>
+	<?php } ?>
 	<?php else : ?>
 		<p><?php esc_html_e( 'No', 'post-grid' ); ?> <?php echo esc_html( $post_type ); ?> <?php esc_html_e( 'found.', 'post-grid' ); ?></p>
 	<?php endif; ?>
